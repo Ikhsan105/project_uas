@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'screens/onboarding_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/home_screen.dart'; // ✅ Tambahan
+import 'onboarding_screen.dart';
+import 'home_screen.dart';
+import 'login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,9 +15,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Flutter UAS Project',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-      ),
+      theme: ThemeData(useMaterial3: true),
       home: const OnboardingScreen(),
       routes: {
         '/login': (context) => const LoginScreen(),
