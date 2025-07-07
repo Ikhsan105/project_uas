@@ -13,11 +13,12 @@ import 'package:project_ambtron/about_screen.dart';
 import 'package:project_ambtron/contact_us_screen.dart';
 import 'package:project_ambtron/settings_screen.dart';
 import 'package:project_ambtron/edit_profile_screen.dart';
-
-// --- TAMBAHKAN IMPORT UNTUK HALAMAN DETAIL ---
 import 'package:project_ambtron/photo_view_screen.dart';
 import 'package:project_ambtron/note_detail_screen.dart';
 import 'package:project_ambtron/privacy_policy_screen.dart';
+
+// --- TAMBAHKAN IMPORT UNTUK HALAMAN DAFTAR KONTEN ---
+import 'package:project_ambtron/typed_content_list_screen.dart';
 
 
 class AppRouter {
@@ -66,24 +67,37 @@ class AppRouter {
         name: 'privacy-policy',
         builder: (context, state) => const PrivacyPolicyScreen(),
       ),
-
-      // --- RUTE BARU UNTUK MELIHAT FOTO ---
       GoRoute(
         path: '/photo-view',
         name: 'photo-view',
         builder: (context, state) {
-          final imageUrl = state.extra as String; // Ambil URL dari parameter
+          final imageUrl = state.extra as String;
           return PhotoViewScreen(imageUrl: imageUrl);
         },
       ),
-
-      // --- RUTE BARU UNTUK MELIHAT CATATAN ---
       GoRoute(
         path: '/note-detail',
         name: 'note-detail',
         builder: (context, state) {
-          final note = state.extra as Map<String, dynamic>; // Ambil data catatan
+          final note = state.extra as Map<String, dynamic>;
           return NoteDetailScreen(note: note);
+        },
+      ),
+      
+      // --- RUTE BARU UNTUK HALAMAN DAFTAR KONTEN BERDASARKAN TIPE ---
+      GoRoute(
+        path: '/typed-content',
+        name: 'typed-content',
+        builder: (context, state) {
+          // Ambil argumen yang dikirim dari halaman profil
+          final args = state.extra as Map<String, String>;
+          final contentType = args['contentType']!;
+          final appBarTitle = args['appBarTitle']!;
+          
+          return TypedContentListScreen(
+            contentType: contentType,
+            appBarTitle: appBarTitle,
+          );
         },
       ),
     ],

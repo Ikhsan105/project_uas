@@ -5,6 +5,32 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 class DatabaseService {
   final _supabase = Supabase.instance.client;
 
+  Future<List<Map<String, dynamic>>> getPhotos() async {
+    try {
+      final userId = _supabase.auth.currentUser!.id;
+      final photosResponse = await _supabase
+          .from('photos')
+          .select()
+          .eq('user_id', userId)
+          .order('created_at', ascending: false); // Urutkan dari yang terbaru
+
+      final List<Map<String, dynamic>> photosWithUrls = [];
+      for (var photo in photosResponse) {
+        final publicUrl = _supabase.storage
+            .from('user-photos')
+            .getPublicUrl(photo['path']);
+
+        photosWithUrls.add({...photo, 'file_url': publicUrl});
+      }
+
+      return photosWithUrls;
+    } catch (e) {
+      print('Error getting photos: $e');
+      return [];
+    }
+  }
+
+
   Future<List<Map<String, dynamic>>> getNotes() async {
     try {
       final userId = _supabase.auth.currentUser!.id;
