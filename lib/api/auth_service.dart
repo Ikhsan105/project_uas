@@ -45,7 +45,21 @@ class AuthService {
     // Setelah logout, paksa kembali ke halaman login
     context.go('/login');
   }
-
+ // --- FUNGSI BARU UNTUK UPDATE EMAIL ---
+  Future<void> updateUserEmail(BuildContext context, String newEmail) async {
+    try {
+      await _supabase.auth.updateUser(UserAttributes(email: newEmail));
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Tautan konfirmasi telah dikirim ke email baru Anda.'),
+          backgroundColor: Colors.amber,
+        ),
+      );
+    } on AuthException catch (e) {
+      // Melempar kembali error agar bisa ditangani oleh UI
+      throw Exception('Gagal memperbarui email: ${e.message}');
+    }
+  }
+}
   // Kamu bisa menambahkan fungsi untuk register (signUp) di sini nanti
   // Future<void> signUp(...) async { ... }
-}

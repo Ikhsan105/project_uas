@@ -93,11 +93,11 @@ class DatabaseService {
       print('Error deleting photo: $e');
     }
   }
-
-  // --- FUNGSI BARU UNTUK UPDATE PROFIL ---
+  
+  // --- ▼▼▼ PERBAIKAN PADA FUNGSI INI ▼▼▼ ---
   Future<void> updateProfile({
     required String username,
-    String? avatarUrl, // Dibuat opsional
+    String? avatarUrl,
   }) async {
     try {
       final userId = _supabase.auth.currentUser!.id;
@@ -106,16 +106,18 @@ class DatabaseService {
         'updated_at': DateTime.now().toIso8601String(),
       };
 
-      // Hanya tambahkan avatar_url ke dalam map jika nilainya tidak null
       if (avatarUrl != null) {
         updates['avatar_url'] = avatarUrl;
       }
 
       await _supabase.from('profiles').update(updates).eq('id', userId);
+    } on PostgrestException catch (e) {
+      // Menangkap error spesifik dari Supabase database
+      print('Database error updating profile: ${e.message}');
+      throw Exception('Gagal memperbarui profil di database.');
     } catch (e) {
-      print('Error updating profile: $e');
-      // Lemparkan error agar UI bisa tahu jika ada masalah
-      throw Exception('Gagal memperbarui profil.');
+      print('Generic error updating profile: $e');
+      throw Exception('Terjadi kesalahan tidak dikenal saat memperbarui profil.');
     }
   }
 }

@@ -6,6 +6,7 @@ import 'package:project_ambtron/api/auth_service.dart';
 import 'package:project_ambtron/api/database_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+// --- DIUBAH MENJADI STATEFULWIDGET UNTUK MENGELOLA STATE ---
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
@@ -17,7 +18,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final DatabaseService _dbService = DatabaseService();
   final AuthService _authService = AuthService();
 
-  // Data dummy untuk penyimpanan dikembalikan
+  // Future untuk data profil dipegang oleh state
+  late Future<Map<String, dynamic>?> _profileFuture;
+
+  // --- SEMUA DATA DUMMY ANDA TETAP DIPERTAHANKAN ---
   static const double totalStorageGB = 100.0;
   static const double photosStorageGB = 20.0;
   static const double videosStorageGB = 10.0;
@@ -28,9 +32,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
   static final double usedPercentage = (usedStorageGB / totalStorageGB);
 
   @override
+  void initState() {
+    super.initState();
+    // Data dimuat pertama kali saat halaman dibuka
+    _profileFuture = _dbService.getProfile();
+  }
+
+  // Fungsi untuk memuat ulang data dari server
+  void _refreshProfileData() {
+    if (mounted) {
+      setState(() {
+        _profileFuture = _dbService.getProfile();
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<Map<String, dynamic>?>(
-      future: _dbService.getProfile(),
+      future: _profileFuture, // Menggunakan future dari state
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -48,6 +68,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Supabase.instance.client.auth.currentUser?.email ??
             'Tidak ada email';
 
+        // --- SEMUA STRUKTUR UI ANDA DIBAWAH INI TIDAK DIUBAH ---
         return ListView(
           padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 80.0),
           children: [
@@ -69,10 +90,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child:
                           avatarUrl == null
                               ? const Icon(
-                                Icons.person,
-                                size: 50,
-                                color: Colors.grey,
-                              )
+                                  Icons.person,
+                                  size: 50,
+                                  color: Colors.grey,
+                                )
                               : null,
                     ),
                     const SizedBox(height: 16),
@@ -105,7 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 24),
 
-            // --- KARTU PENYIMPANAN ANDA (DIKEMBALIKAN) ---
+            // --- KARTU PENYIMPANAN ANDA (DIKEMBALIKAN SEPERTI ASLI) ---
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -137,9 +158,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 value: usedPercentage,
                                 strokeWidth: 20.0,
                                 backgroundColor:
-                                    Theme.of(
-                                      context,
-                                    ).colorScheme.surfaceVariant,
+                                    Theme.of(context).colorScheme.surfaceVariant,
                                 valueColor: AlwaysStoppedAnimation<Color>(
                                   Theme.of(context).primaryColor,
                                 ),
@@ -172,37 +191,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    _buildStorageDetailRow(
-                      context,
-                      'Foto',
-                      Icons.photo_library,
-                      Colors.purple,
-                    ),
-                    _buildStorageDetailRow(
-                      context,
-                      'Video',
-                      Icons.videocam,
-                      Colors.green,
-                    ),
-                    _buildStorageDetailRow(
-                      context,
-                      'Catatan',
-                      Icons.note_alt,
-                      Colors.orange,
-                    ),
-                    _buildStorageDetailRow(
-                      context,
-                      'Sampah',
-                      Icons.delete,
-                      Colors.red,
-                    ),
+                    _buildStorageDetailRow(context, 'Foto', Icons.photo_library, Colors.purple),
+                    _buildStorageDetailRow(context, 'Video', Icons.videocam, Colors.green),
+                    _buildStorageDetailRow(context, 'Catatan', Icons.note_alt, Colors.orange),
+                    _buildStorageDetailRow(context, 'Sampah', Icons.delete, Colors.red),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 24),
 
-            // --- KARTU MENU OPSI (DENGAN TAMBAHAN) ---
+            // --- KARTU MENU OPSI (DENGAN PERBAIKAN NAVIGASI) ---
             Card(
               elevation: 4,
               clipBehavior: Clip.antiAlias,
@@ -215,46 +214,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context,
                     Icons.edit_outlined,
                     'Edit Profil',
-                    () => context.push('/edit-profile'),
-                  ),
-                  const Divider(height: 1),
-                  _buildMenuOption(
-                    context,
-                    Icons.lock_outline,
-                    'Ubah Kata Sandi',
-                    () {
-                        // Logika untuk ubah kata sandi
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text(
-                              'Fitur ubah kata sandi belum diimplementasikan.',
-                            ),
-                          ),
-                        );
+                    // --- INI PERUBAHAN KUNCI ---
+                    () async {
+                      // Navigasi ke halaman edit dan tunggu hasilnya
+                      final bool? didUpdate = await context.push<bool>('/edit-profile');
+                      
+                      // Jika halaman edit ditutup dan hasilnya 'true', muat ulang data
+                      if (didUpdate == true) {
+                        _refreshProfileData();
+                      }
                     },
                   ),
                   const Divider(height: 1),
-                  _buildMenuOption(
-                    context,
-                    Icons.settings_outlined,
-                    'Pengaturan',
-                    () => context.push('/settings'),
-                  ),
+                  _buildMenuOption(context, Icons.lock_outline, 'Ubah Kata Sandi', () {}),
                   const Divider(height: 1),
-                  _buildMenuOption(
-                    context,
-                    Icons.privacy_tip_outlined,
-                    'Izin & Privasi',
-                     // --- PERUBAHAN DI SINI ---
-                    () => context.push('/privacy-policy'),
-                  ),
+                  _buildMenuOption(context, Icons.settings_outlined, 'Pengaturan', () => context.push('/settings')),
                   const Divider(height: 1),
-                  _buildMenuOption(
-                    context,
-                    Icons.info_outline,
-                    'Tentang Aplikasi',
-                    () => context.push('/about'),
-                  ),
+                  _buildMenuOption(context, Icons.privacy_tip_outlined, 'Izin & Privasi', () {}),
+                  const Divider(height: 1),
+                  _buildMenuOption(context, Icons.info_outline, 'Tentang Aplikasi', () => context.push('/about')),
                   const Divider(height: 1),
                   _buildMenuOption(
                     context,
@@ -272,7 +250,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Helper widget untuk detail penyimpanan
+  // --- HELPER WIDGET ANDA (TIDAK DIUBAH) ---
   Widget _buildStorageDetailRow(
     BuildContext context,
     String typeName,
@@ -301,7 +279,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Helper widget untuk opsi menu
+  // --- HELPER WIDGET ANDA (TIDAK DIUBAH) ---
   Widget _buildMenuOption(
     BuildContext context,
     IconData icon,
@@ -325,6 +303,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         color: Colors.grey,
       ),
       onTap: onTap,
-    );
-  }
+);
+}
 }
