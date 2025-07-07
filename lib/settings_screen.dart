@@ -202,10 +202,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   title: const Text('Tentang Aplikasi'),
                   trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                   onTap: () {
-                    Navigator.pushNamed(context, '/about');
+                    Navigator.pushNamed(context, '/about'); // <-- Ganti ini
                   },
                 ),
-                // Mengubah onTap untuk menavigasi ke PrivacyPolicyScreen
                 ListTile(
                   leading: const Icon(Icons.privacy_tip_outlined),
                   title: const Text('Kebijakan Privasi'),
@@ -214,7 +213,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     Navigator.pushNamed(
                       context,
                       '/privacy_policy',
-                    ); // Navigasi ke rute baru
+                    ); // <-- Ganti ini
                   },
                 ),
               ],

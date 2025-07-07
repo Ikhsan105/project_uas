@@ -1,14 +1,15 @@
+// lib/screens/home_screen.dart
+
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
+import 'package:project_ambtron/api/database_service.dart';
+import 'package:project_ambtron/api/storage_service.dart';
+import 'package:project_ambtron/files_screen.dart';
+import 'package:project_ambtron/notes_screen.dart';
+import 'package:project_ambtron/profile_screen.dart';
 
-// Import Screens yang dibutuhkan
-
-import 'files_screen.dart';
-import 'photos_screen.dart';
-import 'notes_screen.dart';
-import 'profile_screen.dart';
-import 'search_screen.dart';
-// import 'package:saifana/screens/note_editor_screen.dart'; // Baris ini dihapus karena tidak digunakan langsung di sini
-
+// --- BAGIAN INI DARI KODE 2 (TIDAK DIUBAH) ---
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -47,37 +48,28 @@ class _HomeDashboardController extends ChangeNotifier {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0; // Index untuk BottomNavigationBar, default ke 'Foto'
-  String _currentTitle = 'Foto'; // Judul AppBar default untuk tab Foto
-
+  int _selectedIndex = 0;
+  String _currentTitle = 'Foto';
   final String _quote = 'Abadikan setiap momen indahmu.';
-
-  // Controller untuk mengelola state seleksi di _HomeDashboard
   late final _HomeDashboardController _dashboardController;
-
-  // GlobalKey untuk mengakses _HomeDashboardState dan mendapatkan daftar item
   final GlobalKey<_HomeDashboardState> _homeDashboardKey = GlobalKey();
-
-  // Daftar widget untuk setiap tab navigasi
-  late final List<Widget> _widgetOptions; // Deklarasikan sebagai late final
+  late final List<Widget> _widgetOptions;
 
   @override
   void initState() {
     super.initState();
     _dashboardController = _HomeDashboardController();
-    // Mendengarkan perubahan pada mode seleksi atau item terpilih untuk memperbarui AppBar
     _dashboardController.isSelectionMode.addListener(_updateAppBar);
     _dashboardController.selectedItems.addListener(_updateAppBar);
 
-    // Inisialisasi _widgetOptions di initState
     _widgetOptions = <Widget>[
       _HomeDashboard(
-        key: _homeDashboardKey, // Tetapkan GlobalKey di sini
+        key: _homeDashboardKey,
         quote: _quote,
         controller: _dashboardController,
       ),
-      const FilesScreen(), // Ini adalah tampilan Koleksi/File
-      const ProfileScreen(), // Ini adalah tampilan Profil
+      const FilesScreen(),
+      const ProfileScreen(),
     ];
   }
 
@@ -90,9 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _updateAppBar() {
-    setState(() {
-      // Rebuild AppBar ketika mode seleksi atau jumlah item terpilih berubah
-    });
+    setState(() {});
   }
 
   void _onItemTapped(int index) {
@@ -100,8 +90,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = index;
       switch (index) {
         case 0:
-          _currentTitle =
-              'Foto'; // Meskipun tampilan di AppBar akan logo/nama app, _currentTitle tetap menyimpan label tab
+          _currentTitle = 'Foto';
           break;
         case 1:
           _currentTitle = 'Koleksi';
@@ -110,13 +99,12 @@ class _HomeScreenState extends State<HomeScreen> {
           _currentTitle = 'Profil';
           break;
         default:
-          _currentTitle = 'Stratocloud'; // Fallback
+          _currentTitle = 'Stratocloud';
           break;
       }
     });
   }
 
-  // Fungsi untuk menampilkan dialog Buat Folder/Catatan/Unggah
   void _showCreateNewDialog() {
     showDialog(
       context: context,
@@ -133,35 +121,46 @@ class _HomeScreenState extends State<HomeScreen> {
                 leading: const Icon(Icons.folder_outlined),
                 title: const Text('Folder Baru'),
                 onTap: () {
-                  Navigator.pop(context); // Tutup dialog "Buat Baru"
-                  _showCreateFolderDialog(
-                    context,
-                  ); // Tampilkan dialog "Buat Folder"
+                  Navigator.pop(context);
+                  _showCreateFolderDialog(context);
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.note_alt_outlined),
                 title: const Text('Catatan Baru'),
                 onTap: () {
-                  Navigator.pop(context); // Tutup dialog "Buat Baru"
-                  Navigator.pushNamed(
-                    context,
-                    '/note_editor',
-                  ); // Navigasi ke editor catatan
+                  Navigator.pop(context);
+                  context.push('/note-editor').then((_) {
+                    _homeDashboardKey.currentState?.refreshGallery();
+                  });
                 },
               ),
               ListTile(
                 leading: const Icon(Icons.photo_camera_outlined),
                 title: const Text('Unggah Foto'),
-                onTap: () {
+                onTap: () async {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text(
-                        'Fitur unggah foto belum diimplementasikan.',
-                      ),
-                    ),
-                  );
+                  final imageUrl = await StorageService().uploadImage();
+                  if (mounted) {
+                    if (imageUrl != null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Foto berhasil diunggah!'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                      _homeDashboardKey.currentState?.refreshGallery();
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Gagal mengunggah foto atau dibatalkan.',
+                          ),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
                 },
               ),
               ListTile(
@@ -185,7 +184,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Dialog untuk membuat folder baru
   void _showCreateFolderDialog(BuildContext context) {
     TextEditingController folderNameController = TextEditingController();
     showDialog(
@@ -208,9 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
           actions: <Widget>[
             TextButton(
               child: const Text('Batal'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
+              onPressed: () => Navigator.of(context).pop(),
             ),
             ElevatedButton(
               child: const Text('Buat'),
@@ -243,7 +239,6 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // Judul AppBar berubah berdasarkan mode seleksi atau tab saat ini
         title: ValueListenableBuilder<bool>(
           valueListenable: _dashboardController.isSelectionMode,
           builder: (context, isSelectionMode, child) {
@@ -255,7 +250,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               );
             } else {
-              // Jika di tab Foto, tampilkan logo dan nama aplikasi
               if (_selectedIndex == 0) {
                 return Row(
                   mainAxisSize: MainAxisSize.min,
@@ -281,42 +275,32 @@ class _HomeScreenState extends State<HomeScreen> {
         leading: ValueListenableBuilder<bool>(
           valueListenable: _dashboardController.isSelectionMode,
           builder: (context, isSelectionMode, child) {
-            if (isSelectionMode) {
-              return IconButton(
-                icon: const Icon(
-                  Icons.close,
-                ), // Tombol silang untuk keluar mode seleksi
-                onPressed: () {
-                  _dashboardController.clearSelection();
-                },
-              );
-            } else {
-              return const SizedBox.shrink(); // Tidak ada leading icon di mode normal
-            }
+            return isSelectionMode
+                ? IconButton(
+                  icon: const Icon(Icons.close),
+                  onPressed: _dashboardController.clearSelection,
+                )
+                : const SizedBox.shrink();
           },
         ),
         actions: [
-          // Jika mode seleksi aktif di tab Foto
           ValueListenableBuilder<bool>(
             valueListenable: _dashboardController.isSelectionMode,
             builder: (context, isSelectionMode, child) {
               List<Widget> actions = [];
-
               if (isSelectionMode && _selectedIndex == 0) {
-                // Tombol "Select All" / "Deselect All"
                 actions.add(
                   ValueListenableBuilder<Set<String>>(
                     valueListenable: _dashboardController.selectedItems,
                     builder: (context, selectedItems, _) {
-                      // Dapatkan semua ID item dari _HomeDashboard
                       final allItemIds =
                           _homeDashboardKey.currentState?._galleryItems
-                              .map((item) => item['id'] as String)
+                              .map((item) => item['id'].toString())
                               .toSet();
                       final bool allSelected =
                           allItemIds != null &&
+                          selectedItems.isNotEmpty &&
                           selectedItems.containsAll(allItemIds);
-
                       return IconButton(
                         icon: Icon(
                           allSelected
@@ -325,13 +309,12 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         onPressed: () {
                           if (allSelected) {
-                            _dashboardController
-                                .clearSelection(); // Deselect all
+                            _dashboardController.clearSelection();
                           } else {
                             if (allItemIds != null) {
                               _dashboardController.selectAll(
                                 allItemIds.toList(),
-                              ); // Select all
+                              );
                             }
                           }
                         },
@@ -343,17 +326,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                 );
-
-                // Tombol tiga titik (Opsi Menu)
                 actions.add(
                   PopupMenuButton<String>(
-                    onSelected: (String result) {
-                      _handleSelectionMenu(
-                        context,
-                        result,
-                        _dashboardController.selectedItems.value,
-                      );
-                    },
+                    onSelected:
+                        (String result) => _handleSelectionMenu(
+                          context,
+                          result,
+                          _dashboardController.selectedItems.value,
+                        ),
                     itemBuilder:
                         (BuildContext context) => <PopupMenuEntry<String>>[
                           const PopupMenuItem<String>(
@@ -368,52 +348,39 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 );
               } else if (_selectedIndex == 0 || _selectedIndex == 1) {
-                // Ikon untuk seleksi manual di mode normal (hanya visual, tekan lama untuk fungsionalitas)
                 actions.add(
                   IconButton(
                     icon: const Icon(Icons.check_circle_outline),
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Tekan lama untuk memulai seleksi.'),
+                    onPressed:
+                        () => ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Tekan lama untuk memulai seleksi.'),
+                          ),
                         ),
-                      );
-                    },
                   ),
                 );
               }
-
-              // Ikon profil mengambang di kanan atas (selalu ada)
               actions.add(
                 Padding(
                   padding: const EdgeInsets.only(right: 8.0),
                   child: GestureDetector(
-                    onTap: () {
-                      Navigator.pushNamed(
-                        context,
-                        '/profile',
-                      ); // Navigasi ke halaman profil
-                    },
+                    onTap: () => context.push('/profile'),
                     child: const CircleAvatar(
                       radius: 18,
                       backgroundImage: NetworkImage(
-                        'https://placehold.co/100x100/0056B3/FFFFFF?text=P', // Placeholder Profil
+                        'https://cdn-icons-png.flaticon.com/512/3135/3135715.png',
                       ),
                       backgroundColor: Colors.transparent,
                     ),
                   ),
                 ),
               );
-              return Row(
-                children: actions,
-              ); // Mengembalikan Row dari semua widget aksi
+              return Row(children: actions);
             },
           ),
         ],
       ),
-      body: _widgetOptions.elementAt(
-        _selectedIndex,
-      ), // Menampilkan widget yang sesuai dengan tab terpilih
+      body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -421,9 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Foto',
           ),
           BottomNavigationBarItem(
-            icon: Icon(
-              Icons.folder_outlined,
-            ), // Menggunakan ikon folder untuk Koleksi
+            icon: Icon(Icons.folder_outlined),
             label: 'Koleksi',
           ),
           BottomNavigationBarItem(
@@ -433,7 +398,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
         currentIndex: _selectedIndex,
         onTap: (index) {
-          // Bersihkan seleksi saat berpindah tab (hanya jika di tab Foto dan mode seleksi aktif)
           if (_selectedIndex == 0 &&
               _dashboardController.isSelectionMode.value) {
             _dashboardController.clearSelection();
@@ -441,7 +405,6 @@ class _HomeScreenState extends State<HomeScreen> {
           _onItemTapped(index);
         },
       ),
-      // FAB selalu tampil di Foto, Koleksi, dan Profil (index 0, 1, dan 2)
       floatingActionButton:
           (_selectedIndex == 0 || _selectedIndex == 1 || _selectedIndex == 2)
               ? FloatingActionButton(
@@ -455,7 +418,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Fungsi untuk menangani pilihan dari PopupMenuButton (titik tiga)
   void _handleSelectionMenu(
     BuildContext context,
     String result,
@@ -469,7 +431,6 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       return;
     }
-
     switch (result) {
       case 'delete':
         _showDeleteOptionsDialog(context, selectedItems);
@@ -526,9 +487,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Batal'),
             ),
           ],
@@ -546,9 +505,6 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
           title: Text('Kelompokkan ${selectedItems.length} Item'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -557,20 +513,13 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 10),
               TextField(
                 controller: folderNameController,
-                decoration: const InputDecoration(
-                  hintText: 'Nama Folder Baru',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.all(Radius.circular(10)),
-                  ),
-                ),
+                decoration: const InputDecoration(hintText: 'Nama Folder Baru'),
               ),
             ],
           ),
           actions: <Widget>[
             TextButton(
-              onPressed: () {
-                Navigator.pop(dialogContext);
-              },
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Batal'),
             ),
             ElevatedButton(
@@ -602,16 +551,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// Widget Dashboard ini sekarang menjadi Tampilan Galeri ala Google Photos (tab 'Foto')
 class _HomeDashboard extends StatefulWidget {
-  // final String userName; // Dihapus penggunaannya di sini - SUDAH DIHAPUS
   final String quote;
-  final _HomeDashboardController
-  controller; // Menerima controller dari HomeScreen
+  final _HomeDashboardController controller;
 
   const _HomeDashboard({
     Key? key,
-    // required this.userName, // Dihapus penggunaannya di sini - SUDAH DIHAPUS DARI KONSTRUKTOR
     required this.quote,
     required this.controller,
   }) : super(key: key);
@@ -621,466 +566,445 @@ class _HomeDashboard extends StatefulWidget {
 }
 
 class _HomeDashboardState extends State<_HomeDashboard> {
-  // Data dummy untuk item galeri dengan tanggal nyata (foto, video, catatan)
-  // Setiap item memiliki ID unik untuk keperluan seleksi
-  // Pastikan _galleryItems tidak const agar bisa diakses oleh GlobalKey.currentState
-  final List<Map<String, dynamic>> _galleryItems = [
-    // Data dummy Hari Ini (misal: 25 Juni 2025)
-    {
-      'id': 'item_001',
-      'type': 'photo',
-      'date': '2025-06-25',
-      'url': 'https://placehold.co/200x200/cccccc/666666?text=Foto1',
-    },
-    {
-      'id': 'item_002',
-      'type': 'video',
-      'date': '2025-06-25',
-      'url': 'https://placehold.co/200x200/dddddd/555555?text=Video1',
-    },
-    {
-      'id': 'item_003',
-      'type': 'note',
-      'date': '2025-06-25',
-      'title': 'Rencana Hari Ini',
-      'content': 'Meeting jam 10 pagi, belanja sore.',
-    },
-    {
-      'id': 'item_004',
-      'type': 'photo',
-      'date': '2025-06-25',
-      'url': 'https://placehold.co/200x200/eeeeee/444444?text=Foto2',
-    },
-
-    // Data dummy Kemarin (misal: 24 Juni 2025)
-    {
-      'id': 'item_005',
-      'type': 'video',
-      'date': '2025-06-24',
-      'url': 'https://placehold.co/200x200/bbccdd/222222?text=Video2',
-    },
-    {
-      'id': 'item_006',
-      'type': 'photo',
-      'date': '2025-06-24',
-      'url': 'https://placehold.co/200x200/ccddeeff/111111?text=Foto4',
-    },
-    {
-      'id': 'item_007',
-      'type': 'note',
-      'date': '2025-06-24',
-      'title': 'Ide Aplikasi Baru',
-      'content': 'Aplikasi untuk melacak kebiasaan.',
-    },
-    {
-      'id': 'item_008',
-      'type': 'photo',
-      'date': '2025-06-24',
-      'url': 'https://placehold.co/200x200/aaddgg/777777?text=Foto5',
-    },
-
-    // Data dummy Minggu Lalu (misal: 18 Juni 2025)
-    {
-      'id': 'item_009',
-      'type': 'video',
-      'date': '2025-06-18',
-      'url': 'https://placehold.co/200x200/bbggrr/888888?text=Video3',
-    },
-    {
-      'id': 'item_010',
-      'type': 'photo',
-      'date': '2025-06-18',
-      'url': 'https://placehold.co/200x200/ffeecc/999999?text=Foto6',
-    },
-    {
-      'id': 'item_011',
-      'type': 'photo',
-      'date': '2025-06-18',
-      'url': 'https://placehold.co/200x200/ccffaa/aaaaaa?text=Foto7',
-    },
-
-    // Data dummy Bulan Lalu (misal: 25 Mei 2025)
-    {
-      'id': 'item_012',
-      'type': 'photo',
-      'date': '2025-05-25',
-      'url': 'https://placehold.co/200x200/eeddcc/bbbbbb?text=Foto8',
-    },
-    {
-      'id': 'item_013',
-      'type': 'video',
-      'date': '2025-05-25',
-      'url': 'https://placehold.co/200x200/ddeeff/cccccc?text=Video4',
-    },
-    {
-      'id': 'item_014',
-      'type': 'note',
-      'date': '2025-05-25',
-      'title': 'Ringkasan Meeting',
-      'content': 'Poin-poin penting dari rapat.',
-    },
-    {
-      'id': 'item_015',
-      'type': 'photo',
-      'date': '2025-05-20',
-      'url': 'https://placehold.co/200x200/ffffee/dddddd?text=Foto9',
-    },
-    {
-      'id': 'item_016',
-      'type': 'photo',
-      'date': '2025-05-15',
-      'url': 'https://placehold.co/200x200/eeffdd/eeeeee?text=Foto10',
-    },
-  ];
+  late Future<List<Map<String, dynamic>>> _galleryFuture;
+  final DatabaseService _dbService = DatabaseService();
+  List<Map<String, dynamic>> _galleryItems = [];
 
   @override
   void initState() {
     super.initState();
-    // Menginisialisasi controller dengan selectedItems dan isSelectionMode dari widget
-    widget.controller.selectedItems.value = {};
-    widget.controller.isSelectionMode.value = false;
+    _loadGallery();
   }
 
-  // Helper function untuk memformat tanggal berdasarkan relatif waktu
+  void _loadGallery() {
+    setState(() {
+      _galleryFuture = _dbService.getGalleryItems();
+    });
+  }
+
+  void refreshGallery() {
+    _loadGallery();
+  }
+
   String _formatDateGroup(DateTime date) {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final yesterday = DateTime(now.year, now.month, now.day - 1);
-
     final itemDate = DateTime(date.year, date.month, date.day);
 
-    if (itemDate == today) {
-      return 'Hari Ini';
-    } else if (itemDate == yesterday) {
-      return 'Kemarin';
-    } else if (now.difference(date).inDays < 7) {
-      return 'Minggu Lalu';
-    } else if (now.difference(date).inDays < 30) {
-      return 'Bulan Lalu';
-    } else {
-      return '${date.day} ${getMonthName(date.month)} ${date.year}';
-    }
+    if (itemDate == today) return 'Hari Ini';
+    if (itemDate == yesterday) return 'Kemarin';
+    if (now.difference(date).inDays < 7) return 'Minggu Lalu';
+    if (now.difference(date).inDays < 30) return 'Bulan Lalu';
+    return DateFormat('d MMMM yyyy', 'id_ID').format(date);
   }
 
   String getMonthName(int month) {
-    switch (month) {
-      case 1:
-        return 'Januari';
-      case 2:
-        return 'Februari';
-      case 3:
-        return 'Maret';
-      case 4:
-        return 'April';
-      case 5:
-        return 'Mei';
-      case 6:
-        return 'Juni';
-      case 7:
-        return 'Juli';
-      case 8:
-        return 'Agustus';
-      case 9:
-        return 'September';
-      case 10:
-        return 'Oktober';
-      case 11:
-        return 'November';
-      case 12:
-        return 'Desember';
-      default:
-        return '';
-    }
+    const monthNames = [
+      "",
+      "Januari",
+      "Februari",
+      "Maret",
+      "April",
+      "Mei",
+      "Juni",
+      "Juli",
+      "Agustus",
+      "September",
+      "Oktober",
+      "November",
+      "Desember",
+    ];
+    return monthNames[month];
   }
 
   @override
   Widget build(BuildContext context) {
-    // Kelompokkan item berdasarkan tanggal nyata
-    final Map<String, List<Map<String, dynamic>>> groupedItems = {};
-    // Urutkan item berdasarkan tanggal terbaru ke terlama
-    final sortedGalleryItems = List<Map<String, dynamic>>.from(
-      _galleryItems,
-    )..sort(
-      (a, b) => DateTime.parse(b['date']).compareTo(DateTime.parse(a['date'])),
-    );
-
-    for (var item in sortedGalleryItems) {
-      final DateTime itemDateTime = DateTime.parse(item['date']);
-      final String dateGroupKey = _formatDateGroup(itemDateTime);
-      if (!groupedItems.containsKey(dateGroupKey)) {
-        groupedItems[dateGroupKey] = [];
-      }
-      groupedItems[dateGroupKey]!.add(item);
-    }
-
-    return CustomScrollView(
-      slivers: [
-        SliverPadding(
-          padding: const EdgeInsets.all(16.0),
-          sliver: SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _galleryFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return RefreshIndicator(
+            onRefresh: () async => _loadGallery(),
+            child: Stack(
               children: [
-                Text(
-                  widget.quote, // Kutipan inspiratif
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    color: Theme.of(
-                      context,
-                    ).textTheme.bodyLarge?.color?.withOpacity(0.7),
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                // Pembungkus Material untuk TextField Search agar memiliki elevation
-                Material(
-                  elevation: 2, // Memberikan sedikit bayangan
-                  borderRadius: BorderRadius.circular(12),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Cari foto, video, atau catatan...',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      filled: true,
-                      fillColor:
-                          Theme.of(
-                            context,
-                          ).cardColor, // Menggunakan warna card/surface
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
-                    ),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Fitur pencarian belum diimplementasikan.',
-                          ),
-                        ),
-                      );
-                    },
+                ListView(),
+                const Center(
+                  child: Text(
+                    'Galeri masih kosong.\nTekan + untuk menambah item.',
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ],
             ),
-          ),
-        ),
-        SliverList(
-          delegate: SliverChildBuilderDelegate((
-            BuildContext context,
-            int index,
-          ) {
-            final dateGroup = groupedItems.keys.elementAt(index);
-            final itemsInGroup = groupedItems[dateGroup]!;
+          );
+        }
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        _galleryItems = snapshot.data!;
+        final Map<String, List<Map<String, dynamic>>> groupedItems = {};
+        for (var item in _galleryItems) {
+          final DateTime itemDateTime = DateTime.parse(item['created_at']);
+          final String dateGroupKey = _formatDateGroup(itemDateTime);
+          if (!groupedItems.containsKey(dateGroupKey)) {
+            groupedItems[dateGroupKey] = [];
+          }
+          groupedItems[dateGroupKey]!.add(item);
+        }
+
+        return RefreshIndicator(
+          onRefresh: () async => _loadGallery(),
+          child: CustomScrollView(
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.all(16.0),
+                sliver: SliverToBoxAdapter(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        dateGroup,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
+                        widget.quote,
+                        style: Theme.of(
+                          context,
+                        ).textTheme.headlineSmall?.copyWith(
+                          fontStyle: FontStyle.italic,
+                          color: Theme.of(
+                            context,
+                          ).textTheme.bodyLarge?.color?.withOpacity(0.7),
                         ),
                       ),
-                      // Placeholder ikon ceklis untuk seleksi di level grup tanggal
-                      IconButton(
-                        icon: const Icon(Icons.check_circle_outline, size: 24),
-                        color: Theme.of(
-                          context,
-                        ).iconTheme.color?.withOpacity(0.7),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Mengaktifkan seleksi untuk ${dateGroup}.',
-                              ),
+                      const SizedBox(height: 20),
+                      Material(
+                        elevation: 2,
+                        borderRadius: BorderRadius.circular(12),
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: 'Cari foto, video, atau catatan...',
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
                             ),
-                          );
-                        },
+                            filled: true,
+                            fillColor: Theme.of(context).cardColor,
+                            contentPadding: const EdgeInsets.symmetric(
+                              vertical: 12,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-                ValueListenableBuilder<Set<String>>(
-                  valueListenable: widget.controller.selectedItems,
-                  builder: (context, selectedItems, child) {
-                    return GridView.builder(
-                      shrinkWrap:
-                          true, // Untuk memastikan GridView dapat di-scroll bersama CustomScrollView
-                      physics:
-                          const NeverScrollableScrollPhysics(), // Nonaktifkan scrolling internal GridView
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3, // 3 kolom untuk media
-                            crossAxisSpacing: 4.0,
-                            mainAxisSpacing: 4.0,
-                          ),
-                      itemCount: itemsInGroup.length,
-                      itemBuilder: (context, itemIndex) {
-                        final item = itemsInGroup[itemIndex];
-                        final String type = item['type'];
-                        final String itemId = item['id'];
-                        final bool isSelected = selectedItems.contains(itemId);
+              ),
+              SliverList(
+                delegate: SliverChildBuilderDelegate((context, index) {
+                  final dateGroup = groupedItems.keys.elementAt(index);
+                  final itemsInGroup = groupedItems[dateGroup]!;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(
+                          16.0,
+                          16.0,
+                          16.0,
+                          8.0,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              dateGroup,
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
+                      ValueListenableBuilder<Set<String>>(
+                        valueListenable: widget.controller.selectedItems,
+                        builder: (context, selectedItems, child) {
+                          return GridView.builder(
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 3,
+                                  crossAxisSpacing: 4.0,
+                                  mainAxisSpacing: 4.0,
+                                ),
+                            itemCount: itemsInGroup.length,
+                            itemBuilder: (context, itemIndex) {
+                              final item = itemsInGroup[itemIndex];
+                              final String type =
+                                  item.containsKey('content')
+                                      ? 'note'
+                                      : 'photo';
+                              final String itemId = item['id'].toString();
+                              final bool isSelected = selectedItems.contains(
+                                itemId,
+                              );
 
-                        Widget contentWidget;
-                        if (type == 'video') {
-                          contentWidget = const Center(
-                            child: Icon(
-                              Icons.play_circle_filled,
-                              color: Colors.white70,
-                              size: 40,
-                            ),
-                          );
-                        } else if (type == 'note') {
-                          contentWidget = Container(
-                            padding: const EdgeInsets.all(8.0),
-                            alignment: Alignment.topLeft,
-                            decoration: BoxDecoration(
-                              color: Theme.of(context).primaryColor.withOpacity(
-                                0.1,
-                              ), // Background catatan
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Icon(
-                                  Icons.sticky_note_2_outlined,
-                                  color: Theme.of(context).primaryColor,
-                                  size: 20,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  item['title'],
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 12,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  item['content'],
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          );
-                        } else {
-                          // photo
-                          contentWidget = Image.network(
-                            item['url'],
-                            fit: BoxFit.cover,
-                            errorBuilder:
-                                (context, error, stackTrace) => Center(
-                                  child: Icon(
-                                    Icons.image_not_supported,
-                                    color: Theme.of(context).iconTheme.color,
-                                  ),
-                                ),
-                          );
-                        }
-
-                        return Material(
-                          // Membungkus item GridView dengan Material
-                          elevation:
-                              isSelected
-                                  ? 4
-                                  : 1, // Elevasi lebih tinggi jika terpilih
-                          borderRadius: BorderRadius.circular(8),
-                          clipBehavior:
-                              Clip.antiAlias, // Penting untuk memastikan gambar terpotong rapi dengan border radius
-                          child: GestureDetector(
-                            onTap: () {
-                              if (widget.controller.isSelectionMode.value) {
-                                widget.controller.toggleSelection(itemId);
+                              Widget contentWidget;
+                              if (type == 'photo') {
+                                final imageUrl = item['file_url'];
+                                contentWidget =
+                                    (imageUrl != null && imageUrl.isNotEmpty)
+                                        ? Image.network(
+                                          imageUrl,
+                                          fit: BoxFit.cover,
+                                          loadingBuilder: (
+                                            context,
+                                            child,
+                                            loadingProgress,
+                                          ) {
+                                            if (loadingProgress == null)
+                                              return child;
+                                            return const Center(
+                                              child: CircularProgressIndicator(
+                                                strokeWidth: 2.0,
+                                              ),
+                                            );
+                                          },
+                                          errorBuilder:
+                                              (context, error, stackTrace) =>
+                                                  const Center(
+                                                    child: Icon(
+                                                      Icons.broken_image,
+                                                      color: Colors.red,
+                                                    ),
+                                                  ),
+                                        )
+                                        : Container(
+                                          color: Colors.grey[300],
+                                          child: const Icon(Icons.image),
+                                        );
                               } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                      'Membuka ${type} dari ${dateGroup}.',
-                                    ),
-                                  ),
-                                );
-                                if (type == 'note') {
-                                  Navigator.pushNamed(
-                                    context,
-                                    '/note_editor',
-                                    arguments: item,
-                                  );
-                                }
-                              }
-                            },
-                            onLongPress: () {
-                              widget.controller.toggleSelection(itemId);
-                            },
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Container(
+                                contentWidget = Container(
+                                  padding: const EdgeInsets.all(8.0),
+                                  alignment: Alignment.topLeft,
                                   decoration: BoxDecoration(
-                                    color: Theme.of(context).cardColor,
+                                    color: Theme.of(
+                                      context,
+                                    ).primaryColor.withOpacity(0.1),
                                     borderRadius: BorderRadius.circular(8),
-                                    // Image DecorationImage perlu dihilangkan dari BoxDecoration jika contentWidget sudah menanganinya
-                                    // Karena sudah ada Image.network di contentWidget, ini bisa dihapus atau dijaga agar tidak tumpang tindih
-                                    image:
-                                        (type == 'photo' || type == 'video') &&
-                                                !isSelected
-                                            ? DecorationImage(
-                                              // Hanya jika bukan mode seleksi
-                                              image: NetworkImage(item['url']),
-                                              fit: BoxFit.cover,
-                                            )
-                                            : null,
                                   ),
-                                  child: contentWidget,
-                                ),
-                                if (isSelected)
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Theme.of(
-                                        context,
-                                      ).primaryColor.withOpacity(0.3),
-                                      borderRadius: BorderRadius.circular(8),
-                                      border: Border.all(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Icon(
+                                        Icons.sticky_note_2_outlined,
                                         color: Theme.of(context).primaryColor,
-                                        width: 3,
+                                        size: 20,
                                       ),
-                                    ),
-                                    child: const Align(
-                                      alignment: Alignment.topLeft,
-                                      child: Padding(
-                                        padding: EdgeInsets.all(4.0),
-                                        child: Icon(
-                                          Icons.check_circle,
-                                          color: Colors.white,
-                                          size: 24,
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        item['title'],
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodySmall?.copyWith(
+                                          fontWeight: FontWeight.bold,
                                         ),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ],
-            );
-          }, childCount: groupedItems.length),
-        ),
-      ],
+                                );
+                              }
+
+                              return Material(
+                                elevation: isSelected ? 4 : 1,
+                                borderRadius: BorderRadius.circular(8),
+                                clipBehavior: Clip.antiAlias,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    // === PERUBAHAN LOGIKA TAP ===
+                                    // Jika mode seleksi, maka fungsi tap adalah memilih.
+                                    // Jika TIDAK, maka fungsi tap adalah melihat detail.
+                                    if (widget
+                                        .controller
+                                        .isSelectionMode
+                                        .value) {
+                                      widget.controller.toggleSelection(itemId);
+                                    } else {
+                                      if (type == 'note') {
+                                        context.pushNamed(
+                                          'note-detail',
+                                          extra: item,
+                                        );
+                                      } else if (type == 'photo') {
+                                        final imageUrl = item['file_url'];
+                                        if (imageUrl != null) {
+                                          context.pushNamed(
+                                            'photo-view',
+                                            extra: imageUrl,
+                                          );
+                                        }
+                                      }
+                                    }
+                                  },
+                                  onLongPress: () {
+                                    widget.controller.toggleSelection(itemId);
+                                  },
+                                  child: Stack(
+                                    fit: StackFit.expand,
+                                    children: [
+                                      contentWidget,
+                                      if (isSelected)
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            color: Theme.of(
+                                              context,
+                                            ).primaryColor.withOpacity(0.4),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            border: Border.all(
+                                              color:
+                                                  Theme.of(
+                                                    context,
+                                                  ).primaryColor,
+                                              width: 3,
+                                            ),
+                                          ),
+                                          child: const Align(
+                                            alignment: Alignment.topLeft,
+                                            child: Padding(
+                                              padding: EdgeInsets.all(4.0),
+                                              child: Icon(
+                                                Icons.check_circle,
+                                                color: Colors.white,
+                                                size: 24,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+
+                                      // --- AWAL TAMBAHAN DARI KODE 1 ---
+                                      // Tampilkan menu titik tiga HANYA jika tidak dalam mode seleksi
+                                      if (!widget
+                                          .controller
+                                          .isSelectionMode
+                                          .value)
+                                        Positioned(
+                                          top: 4,
+                                          right: 4,
+                                          child: PopupMenuButton<String>(
+                                            icon: const Icon(
+                                              Icons.more_vert,
+                                              color: Colors.white,
+                                              shadows: [
+                                                Shadow(blurRadius: 2.0),
+                                              ],
+                                            ),
+                                            onSelected: (value) async {
+                                              if (value == 'delete') {
+                                                final confirm = await showDialog<
+                                                  bool
+                                                >(
+                                                  context: context,
+                                                  builder:
+                                                      (context) => AlertDialog(
+                                                        title: const Text(
+                                                          'Konfirmasi',
+                                                        ),
+                                                        content: const Text(
+                                                          'Apakah Anda yakin ingin menghapus item ini?',
+                                                        ),
+                                                        actions: [
+                                                          TextButton(
+                                                            onPressed:
+                                                                () =>
+                                                                    Navigator.of(
+                                                                      context,
+                                                                    ).pop(
+                                                                      false,
+                                                                    ),
+                                                            child: const Text(
+                                                              'Batal',
+                                                            ),
+                                                          ),
+                                                          TextButton(
+                                                            onPressed:
+                                                                () =>
+                                                                    Navigator.of(
+                                                                      context,
+                                                                    ).pop(true),
+                                                            child: const Text(
+                                                              'Hapus',
+                                                              style: TextStyle(
+                                                                color:
+                                                                    Colors.red,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                );
+                                                if (confirm == true) {
+                                                  if (type == 'note') {
+                                                    await _dbService.deleteNote(
+                                                      item['id'],
+                                                    );
+                                                  } else if (type == 'photo') {
+                                                    await _dbService
+                                                        .deletePhoto(
+                                                          item['id'],
+                                                          item['path'],
+                                                        );
+                                                  }
+                                                  refreshGallery();
+                                                }
+                                              }
+                                            },
+                                            itemBuilder:
+                                                (context) => [
+                                                  const PopupMenuItem<String>(
+                                                    value: 'delete',
+                                                    child: Row(
+                                                      children: [
+                                                        Icon(
+                                                          Icons.delete_outline,
+                                                          color: Colors.red,
+                                                        ),
+                                                        SizedBox(width: 8),
+                                                        Text(
+                                                          'Hapus',
+                                                          style: TextStyle(
+                                                            color: Colors.red,
+                                                          ),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ],
+                                          ),
+                                        ),
+                                      // --- AKHIR TAMBAHAN DARI KODE 1 ---
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                }, childCount: groupedItems.length),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

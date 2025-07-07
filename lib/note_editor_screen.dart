@@ -1,11 +1,11 @@
+// lib/screens/note_editor_screen.dart
+
 import 'package:flutter/material.dart';
+import 'package:project_ambtron/api/database_service.dart';
+import 'package:go_router/go_router.dart';
 
-// Ini adalah placeholder untuk layar editor catatan dengan rich text capabilities di masa depan.
 class NoteEditorScreen extends StatefulWidget {
-  final Map<String, String>?
-  note; // Menerima data catatan opsional untuk mode edit
-
-  const NoteEditorScreen({super.key, this.note});
+  const NoteEditorScreen({super.key});
 
   @override
   State<NoteEditorScreen> createState() => _NoteEditorScreenState();
@@ -14,16 +14,39 @@ class NoteEditorScreen extends StatefulWidget {
 class _NoteEditorScreenState extends State<NoteEditorScreen> {
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _contentController = TextEditingController();
+  final DatabaseService _dbService = DatabaseService();
+  bool _isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    if (widget.note != null) {
-      _titleController.text = widget.note!['title'] ?? '';
-      _contentController.text = widget.note!['content'] ?? '';
+  void _saveNote() async {
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
+
+    final title = _titleController.text.trim();
+    final content = _contentController.text.trim();
+
+    if (title.isNotEmpty) {
+      await _dbService.addNote(title: title, content: content);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Catatan "$title" disimpan.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      if (mounted) context.pop();
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Judul tidak boleh kosong.'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
+
+    if (mounted) setState(() => _isLoading = false);
   }
 
+  // --- BAGIAN YANG PERLU DITAMBAHKAN KEMBALI ---
   @override
   void dispose() {
     _titleController.dispose();
@@ -31,37 +54,31 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
     super.dispose();
   }
 
-  void _saveNote() {
-    final title = _titleController.text;
-    final content = _contentController.text;
-
-    if (title.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Judul catatan tidak boleh kosong.')),
-      );
-      return;
-    }
-
-    // Logika penyimpanan catatan (placeholder)
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Catatan "${title}" disimpan.')));
-    Navigator.pop(context); // Kembali setelah menyimpan
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.note == null ? 'Catatan Baru' : 'Edit Catatan'),
+        title: const Text('Catatan Baru'),
+        // Hubungkan tombol simpan dengan logika baru kita
         actions: [
           IconButton(
-            icon: const Icon(Icons.check), // Ikon untuk menyimpan
+            icon:
+                _isLoading
+                    ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2.0,
+                      ),
+                    )
+                    : const Icon(Icons.check),
             onPressed: _saveNote,
             tooltip: 'Simpan Catatan',
           ),
         ],
       ),
+      // Tampilan UI ini sama seperti yang sudah kamu buat sebelumnya
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -70,14 +87,11 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
               controller: _titleController,
               decoration: const InputDecoration(
                 hintText: 'Judul Catatan',
-                border:
-                    InputBorder.none, // Tanpa border untuk tampilan yang bersih
-                contentPadding: EdgeInsets.zero,
+                border: InputBorder.none,
               ),
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
-              maxLines: 1,
             ),
             const Divider(height: 20, thickness: 1),
             Expanded(
@@ -86,81 +100,11 @@ class _NoteEditorScreenState extends State<NoteEditorScreen> {
                 decoration: const InputDecoration(
                   hintText: 'Mulai tulis catatan Anda di sini...',
                   border: InputBorder.none,
-                  contentPadding: EdgeInsets.zero,
                 ),
                 keyboardType: TextInputType.multiline,
-                maxLines: null, // Memungkinkan banyak baris
-                expands:
-                    true, // Memungkinkan TextField untuk mengisi ruang yang tersedia
+                maxLines: null,
+                expands: true,
                 textAlignVertical: TextAlignVertical.top,
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-            ),
-            // Di sini Anda bisa menambahkan toolbar rich text di masa depan
-            // Contoh placeholder toolbar
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              decoration: BoxDecoration(
-                color: Theme.of(context).cardColor,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      /* Bold */
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Format tebal belum aktif.'),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.format_bold),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      /* Italic */
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Format miring belum aktif.'),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.format_italic),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      /* Underline */
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Format garis bawah belum aktif.'),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.format_underlined),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      /* List */
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Daftar belum aktif.')),
-                      );
-                    },
-                    icon: const Icon(Icons.format_list_bulleted),
-                  ),
-                  IconButton(
-                    onPressed: () {
-                      /* Add Image */
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Sisipkan gambar belum aktif.'),
-                        ),
-                      );
-                    },
-                    icon: const Icon(Icons.image),
-                  ),
-                ],
               ),
             ),
           ],

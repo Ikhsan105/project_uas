@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:project_ambtron/router/app_router.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:project_ambtron/utils/constants.dart';
+import 'package:project_ambtron/theme_provider.dart';
 
 // Import Theme/Utils
 import 'theme_provider.dart';
@@ -23,7 +27,16 @@ import 'privacy_policy_screen.dart';
 import 'contact_us_screen.dart';
 import 'edit_profile_screen.dart';
 
-void main() {
+void main() async {
+  // Pastikan semua binding siap sebelum menjalankan aplikasi
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Inisialisasi Supabase menggunakan URL dan Key dari file constants.dart
+  await Supabase.initialize(
+    url: supabaseUrl, // <-- Mengambil nilai dari constants.dart
+    anonKey: supabaseAnonKey,
+  );
+
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(),
@@ -32,37 +45,24 @@ void main() {
   );
 }
 
+// Buat variabel global agar mudah diakses di mana saja, terutama di router
+final supabase = Supabase.instance.client;
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<ThemeProvider>(
-      builder: (context, themeProvider, child) {
-        return MaterialApp(
-          title: 'Stratocloud',
-          debugShowCheckedModeBanner: false,
-          theme: AppThemes.lightTheme,
-          darkTheme: AppThemes.darkTheme,
-          themeMode: themeProvider.themeMode,
-          home: const SplashScreen(),
-          routes: {
-            '/login': (context) => const LoginScreen(),
-            '/home': (context) => const HomeScreen(),
-            '/settings': (context) => const SettingsScreen(),
-            '/profile': (context) => const ProfileScreen(),
-            '/about': (context) => const AboutScreen(),
-            '/note_editor': (context) => const NoteEditorScreen(),
-            '/permissions_consent':
-                (context) => const PermissionsConsentScreen(),
-            '/privacy_policy': (context) => const PrivacyPolicyScreen(),
-            '/contact_us': (context) => const ContactUsScreen(),
-            '/edit_profile':
-                (context) =>
-                    const EditProfileScreen(), // Rute baru untuk Edit Profil
-          },
-        );
-      },
+    // Ganti MaterialApp biasa menjadi MaterialApp.router
+    return MaterialApp.router(
+      title: 'Stratocloud',
+      debugShowCheckedModeBanner: false,
+      // Tema masih sama seperti sebelumnya
+      theme: AppThemes.lightTheme,
+      darkTheme: AppThemes.darkTheme,
+      themeMode: Provider.of<ThemeProvider>(context).themeMode,
+      // Beritahu MaterialApp untuk menggunakan konfigurasi dari router kita
+      routerConfig: AppRouter.router,
     );
   }
 }

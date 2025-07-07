@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project_ambtron/api/auth_service.dart'; // <-- Pastikan path ini benar
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -8,10 +9,18 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  // Controller untuk input field, tidak ada perubahan
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
-  // Fungsi untuk menampilkan SnackBar (pengganti alert)
+  // --- PENAMBAHAN ---
+  // 1. Buat instance dari AuthService untuk mengakses fungsi login
+  final AuthService _authService = AuthService();
+  // 2. State untuk menampilkan loading saat tombol ditekan
+  bool _isLoading = false;
+  // --- AKHIR PENAMBAHAN ---
+
+  // Fungsi SnackBar, tidak ada perubahan
   void _showSnackBar(String message, {bool isError = false}) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -22,24 +31,51 @@ class _LoginScreenState extends State<LoginScreen> {
     );
   }
 
-  void _login() {
-    final email = _emailController.text;
-    final password = _passwordController.text;
+  // --- PERUBAHAN PADA FUNGSI _login ---
+  void _login() async {
+    // 3. Jadikan fungsi ini 'async'
+    if (_isLoading) return; // Mencegah klik ganda
 
-    // Logika login sederhana (tanpa backend)
+    // 4. Tampilkan loading indicator
+    setState(() {
+      _isLoading = true;
+    });
+
+    // Ambil input dan hapus spasi yang tidak perlu
+    final email = _emailController.text.trim();
+    final password = _passwordController.text.trim();
+
     if (email.isNotEmpty && password.isNotEmpty) {
-      _showSnackBar('Login berhasil! Selamat datang, $email');
-      Navigator.pushReplacementNamed(
-        context,
-        '/home',
-      ); // Navigasi ke HomeScreen
+      // 5. Panggil fungsi signIn dari service yang akan berinteraksi dengan Supabase
+      await _authService.signIn(context, email: email, password: password);
     } else {
       _showSnackBar('Email dan Kata Sandi tidak boleh kosong.', isError: true);
     }
+
+    // 6. Sembunyikan loading indicator setelah selesai
+    // Pengecekan 'mounted' adalah praktik yang aman
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
+  // --- AKHIR PERUBAHAN FUNGSI _login ---
+
+  // --- PENAMBAHAN ---
+  // Menambahkan dispose untuk membersihkan controller saat halaman ditutup
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+  // --- AKHIR PENAMBAHAN ---
 
   @override
   Widget build(BuildContext context) {
+    // Seluruh bagian build widget di bawah ini TIDAK ADA YANG DIUBAH,
+    // kecuali pada bagian ElevatedButton
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -47,7 +83,6 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo Aplikasi (contoh: ikon cloud)
               Icon(
                 Icons.cloud_queue_rounded,
                 size: 120,
@@ -98,8 +133,19 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
+                  // Gunakan fungsi _login yang sudah diubah
                   onPressed: _login,
-                  child: const Text('MASUK'),
+                  // --- PERUBAHAN KECIL PADA TOMBOL ---
+                  // 7. Tampilkan loading atau teks 'MASUK'
+                  child:
+                      _isLoading
+                          ? const CircularProgressIndicator(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          )
+                          : const Text('MASUK'),
+                  // --- AKHIR PERUBAHAN TOMBOL ---
                 ),
               ),
               const SizedBox(height: 20),
@@ -108,7 +154,6 @@ class _LoginScreenState extends State<LoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Tombol Google Sign-In
                   GestureDetector(
                     onTap: () {
                       _showSnackBar('Google Sign-In belum diimplementasikan.');
@@ -117,17 +162,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       radius: 25,
                       backgroundColor: Theme.of(context).cardColor,
                       child: Image.network(
-                        'https://img.icons8.com/color/48/000000/google-logo.png', // Placeholder Google icon
+                        'https://img.icons8.com/color/48/000000/google-logo.png',
                         width: 30,
                         height: 30,
                         errorBuilder:
                             (context, error, stackTrace) =>
-                                const Icon(Icons.g_mobiledata), // Fallback
+                                const Icon(Icons.g_mobiledata),
                       ),
                     ),
                   ),
                   const SizedBox(width: 30),
-                  // Tombol Apple Sign-In
                   GestureDetector(
                     onTap: () {
                       _showSnackBar('Apple Sign-In belum diimplementasikan.');

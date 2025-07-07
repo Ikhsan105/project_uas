@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
@@ -86,10 +87,7 @@ class AboutScreen extends StatelessWidget {
                     Icons.mail_outline,
                     'Hubungi Kami',
                     () {
-                      Navigator.pushNamed(
-                        context,
-                        '/contact_us',
-                      ); // Navigasi ke rute baru
+                      context.push('/contact-us');
                     },
                   ),
                 ],
