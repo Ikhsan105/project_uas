@@ -1,3 +1,5 @@
+// lib/profile_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:project_ambtron/api/auth_service.dart';
@@ -220,34 +222,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context,
                     Icons.lock_outline,
                     'Ubah Kata Sandi',
-                    () {},
+                    () {
+                        // Logika untuk ubah kata sandi
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Fitur ubah kata sandi belum diimplementasikan.',
+                            ),
+                          ),
+                        );
+                    },
                   ),
                   const Divider(height: 1),
                   _buildMenuOption(
                     context,
                     Icons.settings_outlined,
                     'Pengaturan',
-                    () => context.push('/settings'), // <-- INI PERUBAHANNYA
+                    () => context.push('/settings'),
                   ),
                   const Divider(height: 1),
-
-                  // --- OPSI BARU DITAMBAHKAN DI SINI ---
                   _buildMenuOption(
                     context,
                     Icons.privacy_tip_outlined,
                     'Izin & Privasi',
-                    () {},
+                     // --- PERUBAHAN DI SINI ---
+                    () => context.push('/privacy-policy'),
                   ),
                   const Divider(height: 1),
                   _buildMenuOption(
                     context,
                     Icons.info_outline,
                     'Tentang Aplikasi',
-                    () =>
-                        context.push('/about'), // <--- DIUBAH MENJADI NAVIGASI
+                    () => context.push('/about'),
                   ),
-
-                  // --- AKHIR TAMBAHAN ---
                   const Divider(height: 1),
                   _buildMenuOption(
                     context,
@@ -265,7 +272,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Helper widget untuk detail penyimpanan (DIKEMBALIKAN)
+  // Helper widget untuk detail penyimpanan
   Widget _buildStorageDetailRow(
     BuildContext context,
     String typeName,

@@ -1,4 +1,4 @@
-// lib/screens/note_detail_screen.dart
+// lib/note_detail_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -13,7 +13,7 @@ class NoteDetailScreen extends StatelessWidget {
     final title = note['title'] ?? 'Tanpa Judul';
     final content = note['content'] ?? 'Tidak ada konten.';
     final createdDate = DateFormat(
-      'EEEE, d MMMM yyyy, HH:mm',
+      'EEEE, d MMMM yyyy, HH:mm', 'id_ID' // Tambahkan locale Indonesia
     ).format(DateTime.parse(note['created_at']).toLocal());
 
     return Scaffold(

@@ -1,3 +1,5 @@
+// lib/main.dart
+
 import 'package:flutter/material.dart';
 import 'package:project_ambtron/router/app_router.dart';
 import 'package:provider/provider.dart';
@@ -9,23 +11,9 @@ import 'package:project_ambtron/theme_provider.dart';
 import 'theme_provider.dart';
 import 'app_themes.dart';
 
-// Import Screens
-import 'profile_screen.dart';
-import 'home_screen.dart';
-import 'about_screen.dart';
-import 'notes_screen.dart';
-import 'note_editor_screen.dart';
-import 'photos_screen.dart';
-import 'profile_screen.dart';
-import 'settings_screen.dart';
-import 'login_screen.dart';
-import 'search_screen.dart';
-import 'splash_screen.dart';
-import 'permissions_consent_screen.dart';
-import 'typed_content_list_screen.dart';
-import 'privacy_policy_screen.dart';
-import 'contact_us_screen.dart';
-import 'edit_profile_screen.dart';
+// --- 1. TAMBAHKAN IMPORT INI UNTUK INISIALISASI TANGGAL ---
+import 'package:intl/date_symbol_data_local.dart';
+
 
 void main() async {
   // Pastikan semua binding siap sebelum menjalankan aplikasi
@@ -33,9 +21,13 @@ void main() async {
 
   // Inisialisasi Supabase menggunakan URL dan Key dari file constants.dart
   await Supabase.initialize(
-    url: supabaseUrl, // <-- Mengambil nilai dari constants.dart
-    anonKey: supabaseAnonKey,
+    url: supabaseUrl, //
+    anonKey: supabaseAnonKey, //
   );
+  
+  // --- 2. TAMBAHKAN BARIS INISIALISASI DI SINI ---
+  // Memuat data lokalisasi untuk format tanggal Bahasa Indonesia ('id_ID')
+  await initializeDateFormatting('id_ID', null);
 
   runApp(
     ChangeNotifierProvider(
@@ -58,11 +50,11 @@ class MyApp extends StatelessWidget {
       title: 'Stratocloud',
       debugShowCheckedModeBanner: false,
       // Tema masih sama seperti sebelumnya
-      theme: AppThemes.lightTheme,
-      darkTheme: AppThemes.darkTheme,
+      theme: AppThemes.lightTheme, //
+      darkTheme: AppThemes.darkTheme, //
       themeMode: Provider.of<ThemeProvider>(context).themeMode,
       // Beritahu MaterialApp untuk menggunakan konfigurasi dari router kita
-      routerConfig: AppRouter.router,
+      routerConfig: AppRouter.router, //
     );
   }
 }

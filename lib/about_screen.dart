@@ -63,27 +63,6 @@ class AboutScreen extends StatelessWidget {
                 children: [
                   _buildAboutListTile(
                     context,
-                    Icons.verified_user_outlined,
-                    'Kebijakan Privasi',
-                    () {
-                      Navigator.pushNamed(context, '/privacy_policy');
-                    },
-                  ),
-                  _buildAboutListTile(
-                    context,
-                    Icons.description_outlined,
-                    'Ketentuan Layanan',
-                    () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Membuka Ketentuan Layanan.'),
-                        ),
-                      );
-                    },
-                  ),
-                  // Memperbarui onTap untuk menavigasi ke ContactUsScreen
-                  _buildAboutListTile(
-                    context,
                     Icons.mail_outline,
                     'Hubungi Kami',
                     () {

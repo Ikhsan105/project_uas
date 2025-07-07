@@ -1,3 +1,5 @@
+// lib/router/app_router.dart
+
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:project_ambtron/home_screen.dart';
@@ -8,9 +10,15 @@ import 'package:project_ambtron/photos_screen.dart';
 import 'package:project_ambtron/splash_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:project_ambtron/about_screen.dart';
-import 'package:project_ambtron/contact_us_screen.dart'; // <-- TAMBAHKAN IMPORT INI
+import 'package:project_ambtron/contact_us_screen.dart';
 import 'package:project_ambtron/settings_screen.dart';
 import 'package:project_ambtron/edit_profile_screen.dart';
+
+// --- TAMBAHKAN IMPORT UNTUK HALAMAN DETAIL ---
+import 'package:project_ambtron/photo_view_screen.dart';
+import 'package:project_ambtron/note_detail_screen.dart';
+import 'package:project_ambtron/privacy_policy_screen.dart';
+
 
 class AppRouter {
   static final router = GoRouter(
@@ -34,10 +42,9 @@ class AppRouter {
         path: '/photos',
         builder: (context, state) => const PhotosScreen(),
       ),
-
       GoRoute(
         path: '/about',
-        name: 'about', // opsional
+        name: 'about',
         builder: (context, state) => const AboutScreen(),
       ),
       GoRoute(
@@ -53,6 +60,31 @@ class AppRouter {
       GoRoute(
         path: '/edit-profile',
         builder: (context, state) => const EditProfileScreen(),
+      ),
+      GoRoute(
+        path: '/privacy-policy',
+        name: 'privacy-policy',
+        builder: (context, state) => const PrivacyPolicyScreen(),
+      ),
+
+      // --- RUTE BARU UNTUK MELIHAT FOTO ---
+      GoRoute(
+        path: '/photo-view',
+        name: 'photo-view',
+        builder: (context, state) {
+          final imageUrl = state.extra as String; // Ambil URL dari parameter
+          return PhotoViewScreen(imageUrl: imageUrl);
+        },
+      ),
+
+      // --- RUTE BARU UNTUK MELIHAT CATATAN ---
+      GoRoute(
+        path: '/note-detail',
+        name: 'note-detail',
+        builder: (context, state) {
+          final note = state.extra as Map<String, dynamic>; // Ambil data catatan
+          return NoteDetailScreen(note: note);
+        },
       ),
     ],
     redirect: (context, state) {

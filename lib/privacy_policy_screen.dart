@@ -13,14 +13,14 @@ class PrivacyPolicyScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Kebijakan Privasi Stratocloud',
+              'Privacy Policy',
               style: Theme.of(
                 context,
               ).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
             Text(
-              'Terakhir diperbarui: 27 Juni 2025',
+              'Terakhir diperbarui: 30 Juni 2025',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 color: Theme.of(
                   context,
@@ -29,148 +29,141 @@ class PrivacyPolicyScreen extends StatelessWidget {
             ),
             const SizedBox(height: 24),
             Text(
-              'Pengantar',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Stratocloud ("kami", "milik kami", atau "kami") mengoperasikan aplikasi seluler Stratocloud (selanjutnya disebut sebagai "Layanan"). Halaman ini memberitahu Anda tentang kebijakan kami mengenai pengumpulan, penggunaan, dan pengungkapan data pribadi saat Anda menggunakan Layanan kami dan pilihan yang Anda miliki terkait data tersebut.',
+              'Aplikasi StratoCloud ("kami", "aplikasi", atau "layanan") menghargai dan melindungi privasi pengguna kami ("Anda"). Kebijakan privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, menyimpan, dan melindungi data pribadi Anda saat menggunakan aplikasi kami.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 24),
-            Text(
-              'Pengumpulan dan Penggunaan Informasi',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Kami mengumpulkan beberapa jenis informasi untuk berbagai tujuan guna menyediakan dan meningkatkan Layanan kami kepada Anda. Jenis informasi yang dikumpulkan mungkin termasuk, namun tidak terbatas pada:',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 16),
-            _buildPrivacyPoint(
+            _buildPrivacySection(
               context,
-              'Data Pribadi:',
-              'Saat menggunakan Layanan kami, kami mungkin meminta Anda untuk memberikan kami informasi pengenal pribadi tertentu yang dapat digunakan untuk menghubungi atau mengidentifikasi Anda ("Data Pribadi"). Informasi pengenal pribadi mungkin termasuk, namun tidak terbatas pada: Alamat email, Nama depan dan nama belakang, Nomor telepon, Alamat, Negara, Kota, Cookies dan Data Penggunaan.',
+              '1. Informasi yang Kami Kumpulkan',
+              'Saat Anda menggunakan StratoCloud, kami dapat mengumpulkan beberapa jenis informasi, termasuk:',
+              [
+                _buildPrivacyPoint(context, 'Informasi Pribadi:', 'seperti nama, alamat email (misalnya: 230103031@mhs.id), dan detail login.'),
+                _buildPrivacyPoint(context, 'Informasi File/Media:', 'seperti nama file, ukuran, dan jenis file yang Anda simpan di aplikasi.'),
+                _buildPrivacyPoint(context, 'Data Teknis:', 'seperti jenis perangkat, sistem operasi, alamat IP, waktu akses, dan aktivitas di aplikasi.'),
+              ],
             ),
-            _buildPrivacyPoint(
+            _buildPrivacySection(
               context,
-              'Data Penggunaan:',
-              'Kami juga dapat mengumpulkan informasi tentang bagaimana Layanan diakses dan digunakan ("Data Penggunaan"). Data Penggunaan ini dapat mencakup informasi seperti alamat Protokol Internet komputer Anda (misalnya alamat IP), jenis browser, versi browser, halaman Layanan kami yang Anda kunjungi, waktu dan tanggal kunjungan Anda, waktu yang dihabiskan di halaman-halaman tersebut, pengenal perangkat unik dan data diagnostik lainnya.',
+              '2. Cara Kami Menggunakan Informasi Anda',
+              'Informasi yang kami kumpulkan digunakan untuk:',
+              [
+                _buildPrivacyPoint(context, null, 'Memberikan dan mengelola akses ke layanan penyimpanan file.'),
+                _buildPrivacyPoint(context, null, 'Meningkatkan performa dan keamanan aplikasi.'),
+                _buildPrivacyPoint(context, null, 'Memberikan dukungan atau respon jika Anda menghubungi kami melalui email.'),
+                _buildPrivacyPoint(context, null, 'Mengirimkan pembaruan layanan atau informasi penting lainnya (jika diperlukan).'),
+              ],
             ),
-            _buildPrivacyPoint(
+            _buildPrivacySection(
               context,
-              'Data yang Dikumpulkan dari Penyimpanan Cloud:',
-              'Layanan Stratocloud adalah aplikasi penyimpanan cloud. Oleh karena itu, kami akan menyimpan file, foto, video, catatan, dan dokumen lain yang Anda unggah ke Layanan kami. Data ini disimpan dengan aman di server cloud pihak ketiga kami. Kami tidak akan mengakses, melihat, atau membagikan data Anda tanpa izin eksplisit Anda atau kecuali diwajibkan oleh hukum.',
+              '3. Penyimpanan dan Keamanan Data',
+              'Kami menyimpan data Anda dengan aman menggunakan sistem enkripsi dan prosedur perlindungan yang sesuai. Kami berkomitmen untuk:',
+              [
+                _buildPrivacyPoint(context, null, 'Tidak menjual atau membagikan data pribadi Anda kepada pihak ketiga tanpa izin Anda.'),
+                _buildPrivacyPoint(context, null, 'Melindungi informasi Anda dari akses, perubahan, atau penghapusan yang tidak sah.'),
+              ],
             ),
-            const SizedBox(height: 24),
-            Text(
-              'Penggunaan Data',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Stratocloud menggunakan data yang dikumpulkan untuk berbagai tujuan:',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 16),
-            _buildPrivacyPoint(
+            _buildPrivacySection(
               context,
-              '- Untuk menyediakan dan memelihara Layanan.',
-              null,
+              '4. Hak Pengguna',
+              'Sebagai pengguna, Anda memiliki hak untuk:',
+              [
+                _buildPrivacyPoint(context, null, 'Mengakses, memperbarui, atau menghapus data pribadi Anda.'),
+                _buildPrivacyPoint(context, null, 'Menarik persetujuan atas pengumpulan data tertentu kapan saja.'),
+                _buildPrivacyPoint(context, null, 'Menghubungi kami jika ada kekhawatiran terkait penggunaan data pribadi Anda.'),
+              ],
             ),
-            _buildPrivacyPoint(
+            _buildPrivacySection(
               context,
-              '- Untuk memberi tahu Anda tentang perubahan pada Layanan kami.',
-              null,
+              '5. Cookie dan Teknologi Pelacakan',
+              'StratoCloud tidak menggunakan cookie untuk melacak pengguna. Namun, data teknis seperti log akses dapat dikumpulkan untuk keperluan analitik internal.',
+              [],
             ),
-            _buildPrivacyPoint(
+            _buildPrivacySection(
               context,
-              '- Untuk memungkinkan Anda berpartisipasi dalam fitur interaktif Layanan kami saat Anda memilih untuk melakukannya.',
-              null,
+              '6. Layanan Pihak Ketiga',
+              'Jika aplikasi menggunakan layanan pihak ketiga (misalnya Google Drive, Firebase, dll), layanan tersebut memiliki kebijakan privasi tersendiri. Kami menyarankan Anda untuk membaca kebijakan privasi masing-masing layanan jika digunakan dalam aplikasi.',
+              [],
             ),
-            _buildPrivacyPoint(
+            _buildPrivacySection(
               context,
-              '- Untuk memberikan dukungan pelanggan.',
-              null,
+              '7. Perubahan Kebijakan Privasi',
+              'Kebijakan ini dapat diperbarui dari waktu ke waktu. Perubahan besar akan diinformasikan melalui aplikasi atau email yang Anda daftarkan.',
+              [],
             ),
-            _buildPrivacyPoint(
+            _buildPrivacySection(
               context,
-              '- Untuk memantau penggunaan Layanan.',
-              null,
+              '8. Hubungi Kami',
+              'Jika Anda memiliki pertanyaan atau permintaan mengenai kebijakan privasi ini, silakan hubungi kami di:',
+              [
+                _buildPrivacyPoint(context, '📧 Email:', '230103031@mhs.udb.ac.id'),
+              ],
             ),
-            _buildPrivacyPoint(
-              context,
-              '- Untuk mendeteksi, mencegah, dan mengatasi masalah teknis.',
-              null,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Keamanan Data',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Keamanan data Anda penting bagi kami, tetapi ingat bahwa tidak ada metode transmisi melalui Internet, atau metode penyimpanan elektronik yang 100% aman. Meskipun kami berusaha untuk menggunakan cara yang dapat diterima secara komersial untuk melindungi Data Pribadi Anda, kami tidak dapat menjamin keamanan mutlaknya.',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Perubahan pada Kebijakan Privasi Ini',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Kami dapat memperbarui Kebijakan Privasi kami dari waktu ke waktu. Kami akan memberi tahu Anda tentang setiap perubahan dengan memposting Kebijakan Privasi baru di halaman ini. Anda disarankan untuk meninjau Kebijakan Privasi ini secara berkala untuk setiap perubahan. Perubahan pada Kebijakan Privasi ini efektif saat diposting di halaman ini.',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Hubungi Kami',
-              style: Theme.of(
-                context,
-              ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Jika Anda memiliki pertanyaan tentang Kebijakan Privasi ini, silakan hubungi kami melalui email: support@stratocloud.com',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-            const SizedBox(height: 24),
+             const SizedBox(height: 24),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildPrivacyPoint(
+  Widget _buildPrivacySection(
     BuildContext context,
     String title,
+    String? description,
+    List<Widget> points,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: Theme.of(
+            context,
+          ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        if (description != null)
+        Text(
+          description,
+          style: Theme.of(context).textTheme.bodyMedium,
+        ),
+        const SizedBox(height: 8),
+        ...points,
+        const SizedBox(height: 24),
+      ],
+    );
+  }
+
+  Widget _buildPrivacyPoint(
+    BuildContext context,
+    String? title,
     String? content,
   ) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Column(
+      padding: const EdgeInsets.only(left: 16.0, top: 4.0, bottom: 4.0),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+          if (title == null)
+            const Text("• ", style: TextStyle(fontWeight: FontWeight.bold)),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: Theme.of(context).textTheme.bodyMedium,
+                children: [
+                  if (title != null)
+                  TextSpan(
+                    text: title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  if (content != null)
+                  TextSpan(
+                    text: ' $content',
+                  ),
+                ],
+              ),
+            ),
           ),
-          if (content != null)
-            Text(content, style: Theme.of(context).textTheme.bodyMedium),
         ],
       ),
     );

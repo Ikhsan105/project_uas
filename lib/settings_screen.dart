@@ -175,50 +175,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
-          Material(
-            // Membungkus dengan Material untuk elevation
-            elevation: 4,
-            borderRadius: BorderRadius.circular(16),
-            color: Theme.of(context).cardColor,
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Align(
-                    // Menggunakan Align untuk memastikan teks rata kiri
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Lain-lain',
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                const Divider(height: 0, indent: 16, endIndent: 16),
-                ListTile(
-                  leading: const Icon(Icons.info_outline),
-                  title: const Text('Tentang Aplikasi'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    Navigator.pushNamed(context, '/about'); // <-- Ganti ini
-                  },
-                ),
-                ListTile(
-                  leading: const Icon(Icons.privacy_tip_outlined),
-                  title: const Text('Kebijakan Privasi'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () {
-                    Navigator.pushNamed(
-                      context,
-                      '/privacy_policy',
-                    ); // <-- Ganti ini
-                  },
-                ),
-              ],
-            ),
-          ),
         ],
       ),
     );

@@ -1,4 +1,4 @@
-// lib/screens/home_screen.dart
+// lib/home_screen.dart
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -9,7 +9,6 @@ import 'package:project_ambtron/files_screen.dart';
 import 'package:project_ambtron/notes_screen.dart';
 import 'package:project_ambtron/profile_screen.dart';
 
-// --- BAGIAN INI DARI KODE 2 (TIDAK DIUBAH) ---
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -599,25 +598,6 @@ class _HomeDashboardState extends State<_HomeDashboard> {
     return DateFormat('d MMMM yyyy', 'id_ID').format(date);
   }
 
-  String getMonthName(int month) {
-    const monthNames = [
-      "",
-      "Januari",
-      "Februari",
-      "Maret",
-      "April",
-      "Mei",
-      "Juni",
-      "Juli",
-      "Agustus",
-      "September",
-      "Oktober",
-      "November",
-      "Desember",
-    ];
-    return monthNames[month];
-  }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Map<String, dynamic>>>(
@@ -785,7 +765,7 @@ class _HomeDashboardState extends State<_HomeDashboard> {
                                           color: Colors.grey[300],
                                           child: const Icon(Icons.image),
                                         );
-                              } else {
+                              } else { // type == 'note'
                                 contentWidget = Container(
                                   padding: const EdgeInsets.all(8.0),
                                   alignment: Alignment.topLeft,
@@ -825,33 +805,38 @@ class _HomeDashboardState extends State<_HomeDashboard> {
                                 borderRadius: BorderRadius.circular(8),
                                 clipBehavior: Clip.antiAlias,
                                 child: GestureDetector(
+                                  // ================================================================
+                                  // === INI ADALAH BAGIAN UTAMA YANG DIUBAH UNTUK NAVIGASI TAP ===
+                                  // ================================================================
                                   onTap: () {
-                                    // === PERUBAHAN LOGIKA TAP ===
-                                    // Jika mode seleksi, maka fungsi tap adalah memilih.
-                                    // Jika TIDAK, maka fungsi tap adalah melihat detail.
+                                    // Jika mode seleksi aktif, tap berfungsi untuk memilih/batal memilih.
                                     if (widget
                                         .controller
                                         .isSelectionMode
                                         .value) {
                                       widget.controller.toggleSelection(itemId);
                                     } else {
+                                      // Jika tidak dalam mode seleksi, tap berfungsi untuk melihat detail.
                                       if (type == 'note') {
+                                        // Navigasi ke halaman detail catatan
                                         context.pushNamed(
                                           'note-detail',
-                                          extra: item,
+                                          extra: item, // Kirim seluruh data catatan
                                         );
                                       } else if (type == 'photo') {
                                         final imageUrl = item['file_url'];
                                         if (imageUrl != null) {
+                                          // Navigasi ke halaman detail foto
                                           context.pushNamed(
                                             'photo-view',
-                                            extra: imageUrl,
+                                            extra: imageUrl, // Kirim hanya URL gambar
                                           );
                                         }
                                       }
                                     }
                                   },
                                   onLongPress: () {
+                                    // Tekan lama selalu untuk memulai mode seleksi
                                     widget.controller.toggleSelection(itemId);
                                   },
                                   child: Stack(
@@ -887,9 +872,6 @@ class _HomeDashboardState extends State<_HomeDashboard> {
                                             ),
                                           ),
                                         ),
-
-                                      // --- AWAL TAMBAHAN DARI KODE 1 ---
-                                      // Tampilkan menu titik tiga HANYA jika tidak dalam mode seleksi
                                       if (!widget
                                           .controller
                                           .isSelectionMode
@@ -988,7 +970,6 @@ class _HomeDashboardState extends State<_HomeDashboard> {
                                                 ],
                                           ),
                                         ),
-                                      // --- AKHIR TAMBAHAN DARI KODE 1 ---
                                     ],
                                   ),
                                 ),
