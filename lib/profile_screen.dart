@@ -68,7 +68,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Supabase.instance.client.auth.currentUser?.email ??
             'Tidak ada email';
 
-        // --- SEMUA STRUKTUR UI ANDA DIBAWAH INI TIDAK DIUBAH ---
         return ListView(
           padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 80.0),
           children: [
@@ -126,7 +125,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
             const SizedBox(height: 24),
 
-            // --- KARTU PENYIMPANAN ANDA (DIKEMBALIKAN SEPERTI ASLI) ---
+            // --- KARTU PENYIMPANAN ANDA (DENGAN FUNGSI NAVIGASI) ---
             Card(
               elevation: 4,
               shape: RoundedRectangleBorder(
@@ -191,17 +190,61 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    _buildStorageDetailRow(context, 'Foto', Icons.photo_library, Colors.purple),
-                    _buildStorageDetailRow(context, 'Video', Icons.videocam, Colors.green),
-                    _buildStorageDetailRow(context, 'Catatan', Icons.note_alt, Colors.orange),
-                    _buildStorageDetailRow(context, 'Sampah', Icons.delete, Colors.red),
+                    _buildStorageDetailRow(
+                      context,
+                      'Foto',
+                      Icons.photo_library,
+                      Colors.purple,
+                      onTap: () {
+                        context.push('/typed-content', extra: {
+                          'contentType': 'photo',
+                          'appBarTitle': 'Foto'
+                        });
+                      },
+                    ),
+                    _buildStorageDetailRow(
+                      context,
+                      'Video',
+                      Icons.videocam,
+                      Colors.green,
+                      onTap: () {
+                        context.push('/typed-content', extra: {
+                          'contentType': 'video',
+                          'appBarTitle': 'Video'
+                        });
+                      },
+                    ),
+                    _buildStorageDetailRow(
+                      context,
+                      'Catatan',
+                      Icons.note_alt,
+                      Colors.orange,
+                      onTap: () {
+                        context.push('/typed-content', extra: {
+                          'contentType': 'note',
+                          'appBarTitle': 'Catatan'
+                        });
+                      },
+                    ),
+                    _buildStorageDetailRow(
+                      context,
+                      'Sampah',
+                      Icons.delete,
+                      Colors.red,
+                      onTap: () {
+                        context.push('/typed-content', extra: {
+                          'contentType': 'trash',
+                          'appBarTitle': 'Sampah'
+                        });
+                      },
+                    ),
                   ],
                 ),
               ),
             ),
             const SizedBox(height: 24),
 
-            // --- KARTU MENU OPSI (DENGAN PERBAIKAN NAVIGASI) ---
+            // --- KARTU MENU OPSI (DENGAN PERBAIKAN NAVIGASI EDIT) ---
             Card(
               elevation: 4,
               clipBehavior: Clip.antiAlias,
@@ -214,25 +257,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     context,
                     Icons.edit_outlined,
                     'Edit Profil',
-                    // --- INI PERUBAHAN KUNCI ---
                     () async {
-                      // Navigasi ke halaman edit dan tunggu hasilnya
                       final bool? didUpdate = await context.push<bool>('/edit-profile');
-                      
-                      // Jika halaman edit ditutup dan hasilnya 'true', muat ulang data
                       if (didUpdate == true) {
                         _refreshProfileData();
                       }
                     },
                   ),
                   const Divider(height: 1),
-                  _buildMenuOption(context, Icons.lock_outline, 'Ubah Kata Sandi', () {}),
+                  _buildMenuOption(
+                    context,
+                    Icons.lock_outline,
+                    'Ubah Kata Sandi',
+                    () {},
+                  ),
                   const Divider(height: 1),
-                  _buildMenuOption(context, Icons.settings_outlined, 'Pengaturan', () => context.push('/settings')),
+                  _buildMenuOption(
+                    context,
+                    Icons.settings_outlined,
+                    'Pengaturan',
+                    () => context.push('/settings'),
+                  ),
                   const Divider(height: 1),
-                  _buildMenuOption(context, Icons.privacy_tip_outlined, 'Izin & Privasi', () {}),
+                  _buildMenuOption(
+                    context,
+                    Icons.privacy_tip_outlined,
+                    'Izin & Privasi',
+                    () => context.push('/privacy-policy'),
+                  ),
                   const Divider(height: 1),
-                  _buildMenuOption(context, Icons.info_outline, 'Tentang Aplikasi', () => context.push('/about')),
+                  _buildMenuOption(
+                    context,
+                    Icons.info_outline,
+                    'Tentang Aplikasi',
+                    () => context.push('/about'),
+                  ),
                   const Divider(height: 1),
                   _buildMenuOption(
                     context,
@@ -250,36 +309,41 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // --- HELPER WIDGET ANDA (TIDAK DIUBAH) ---
+  // --- Helper widget untuk detail penyimpanan (DIUBAH UNTUK MENERIMA onTap) ---
   Widget _buildStorageDetailRow(
     BuildContext context,
     String typeName,
     IconData icon,
-    Color color,
-  ) {
+    Color color, {
+    required VoidCallback onTap,
+  }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: InkWell(
-        onTap: () {},
-        child: Row(
-          children: [
-            Icon(icon, color: color),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Text(
-                typeName,
-                style: Theme.of(context).textTheme.bodyLarge,
+        onTap: onTap, // Menggunakan fungsi onTap yang diberikan
+        borderRadius: BorderRadius.circular(8),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+          child: Row(
+            children: [
+              Icon(icon, color: color),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Text(
+                  typeName,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
               ),
-            ),
-            const SizedBox(width: 8),
-            const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-          ],
+              const SizedBox(width: 8),
+              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // --- HELPER WIDGET ANDA (TIDAK DIUBAH) ---
+  // --- Helper widget untuk opsi menu (TIDAK DIUBAH) ---
   Widget _buildMenuOption(
     BuildContext context,
     IconData icon,
@@ -303,6 +367,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         color: Colors.grey,
       ),
       onTap: onTap,
-);
-}
+    );
+  }
 }
