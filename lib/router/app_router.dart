@@ -20,7 +20,6 @@ import 'package:project_ambtron/privacy_policy_screen.dart';
 // --- TAMBAHKAN IMPORT UNTUK HALAMAN DAFTAR KONTEN ---
 import 'package:project_ambtron/typed_content_list_screen.dart';
 
-
 class AppRouter {
   static final router = GoRouter(
     refreshListenable: GoRouterRefreshStream(
@@ -83,7 +82,7 @@ class AppRouter {
           return NoteDetailScreen(note: note);
         },
       ),
-      
+
       // --- RUTE BARU UNTUK HALAMAN DAFTAR KONTEN BERDASARKAN TIPE ---
       GoRoute(
         path: '/typed-content',
@@ -93,7 +92,7 @@ class AppRouter {
           final args = state.extra as Map<String, String>;
           final contentType = args['contentType']!;
           final appBarTitle = args['appBarTitle']!;
-          
+
           return TypedContentListScreen(
             contentType: contentType,
             appBarTitle: appBarTitle,
@@ -104,6 +103,15 @@ class AppRouter {
     redirect: (context, state) {
       final loggedIn = Supabase.instance.client.auth.currentSession != null;
       final loggingIn = state.matchedLocation == '/login';
+      final isSplash = state.matchedLocation == '/';
+
+      // Jika sedang di splash screen, jangan redirect.
+      // Biarkan splash screen yang menangani navigasi selanjutnya.
+      if (isSplash) {
+        return null;
+      }
+
+      // Logika redirect yang sudah ada tetap berjalan untuk halaman lain
       if (!loggedIn) return loggingIn ? null : '/login';
       if (loggingIn) return '/home';
       return null;

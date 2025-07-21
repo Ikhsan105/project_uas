@@ -1,14 +1,33 @@
-// lib/screens/splash_screen.dart
+// lib/splash_screen.dart
 
+import 'dart:async'; // Import Timer
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart'; // Import GoRouter
 
-class SplashScreen extends StatelessWidget {
+class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
   @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Pindah ke halaman login setelah 3 detik
+    Timer(const Duration(seconds: 3), () {
+      // Pengecekan 'mounted' untuk memastikan widget masih ada di tree
+      if (mounted) {
+        // Gunakan GoRouter untuk navigasi ke halaman login
+        context.go('/login');
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Tidak ada lagi initState atau Future.delayed
-    // Ini hanya halaman UI biasa.
+    // Tampilan UI tidak perlu diubah
     return Scaffold(
       backgroundColor: Theme.of(context).primaryColor,
       body: Center(
